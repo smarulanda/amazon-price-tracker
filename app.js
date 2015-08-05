@@ -1,12 +1,12 @@
 var request = require('request');
 var prompt = require('prompt');
-var PushBullet = require('pushbullet');
-var $ = require('cheerio');
+var pb = require('pushbullet');
+var cheerio = require('cheerio');
 
 // Variables
 var asin, price, pb_token;
 var amzn_url = 'http://www.amazon.com/dp/';
-var span_id = 'actualPriceValue';
+var span_id = '#actualPriceValue';
 var check_interval = 60000;
 
 var schema = {
@@ -47,10 +47,12 @@ prompt.get(schema, function (error, result) {
 function checkPrice() {
 	request(amzn_url, function(error, response, body) {
 		if (!error && response.statusCode == 200) {
-			var html = $.load(body);
-			var list_price = html('#' + span_id).text().replace('$', '').replace(',', '');
+			var $ = cheerio.load(body);
 
-			if (list_price <= price) {
+			var list_price = $(span_id).text();
+			var stripped_price = list_price.replace('$', '').replace(',', '');
+
+			if (stripped_price <= price) {
 				sendPush();
 			}
 		}
@@ -63,7 +65,7 @@ function checkPrice() {
 }
 
 function sendPush() {
-	var pusher = new PushBullet(pb_token);
+	var pusher = new pb(pb_token);
 
 	pusher.note(null, "Amazon Price Watch", "A product you are watching has dropped in price: " + amzn_url, function(error, response) {
 		if (!error) {
