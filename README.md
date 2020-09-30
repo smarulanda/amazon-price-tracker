@@ -1,4 +1,4 @@
-Amazon Price Tracker
+Amazon Price Tracker:-
 ==============
 
 Receive a Pushbullet notification when a specific Amazon product has dropped below the desired price.
